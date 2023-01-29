@@ -1,6 +1,7 @@
-import { useState, useEffect, useId } from 'react';
+import { useEffect, useId } from 'react';
 import './App.css';
 import { atom, useAtom } from 'jotai';
+import produce from 'immer';
 
 const boardStructure = Array(3).fill(new Array(3).fill('-'));
 const boardAtom = atom(boardStructure);
@@ -85,12 +86,12 @@ function Board() {
     }
   }
 
-  function resetBoard() {
+  const resetBoard = () => {
     setBoard(boardStructure);
     setPlayer('X');
     setWinningTriplet([]);
     setLastMove([0, 0]);
-  }
+  };
 
   return (
     <div className="board">
@@ -136,12 +137,14 @@ function Box({ rowNum, columnNum }) {
   });
 
   function setSign(row, column) {
-    const boardCopy = JSON.parse(JSON.stringify(board));
     setLastMove([row, column]);
 
-    if (boardCopy[row][column] === '-') {
-      boardCopy[row][column] = player;
-      setBoard(boardCopy);
+    if (board[row][column] === '-') {
+      setBoard(
+        produce((board) => {
+          board[row][column] = player;
+        })
+      );
       setPlayer(player === 'X' ? 'O' : 'X');
     }
   }
